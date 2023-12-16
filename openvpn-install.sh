@@ -1319,7 +1319,7 @@ function manageMenu() {
 	echo "   3) OpenVPN を削除する"
 	echo "   4) 終了"
 	until [[ $MENU_OPTION =~ ^[1-4]$ ]]; do
-		read -rp "Select an option [1-4]: " MENU_OPTION
+		read -rp "選択肢一つを選択してください [1-4]: " MENU_OPTION
 	done
 
 	case $MENU_OPTION in
