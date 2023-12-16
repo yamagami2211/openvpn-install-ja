@@ -1,7 +1,10 @@
 #!/bin/bash
 # shellcheck disable=SC1091,SC2164,SC2034,SC1072,SC1073,SC1009
 
-# Secure OpenVPN server installer for Debian, Ubuntu, CentOS, Amazon Linux 2, Fedora, Oracle Linux 8, Arch Linux, Rocky Linux and AlmaLinux.
+# Debian、Ubuntu、CentOS、Amazon Linux 2、Fedora、Oracle Linux 8、Arch Linux、Rocky Linux、AlmaLinux 用の安全な OpenVPN サーバー インストーラー。
+# https://github.com/yamagami2211/openvpn-install-ja
+# このスクリプトは openvpn-install を日本語化したものです。
+# 元のリポジトリは以下のリンクです。
 # https://github.com/angristan/openvpn-install
 
 function isRoot() {
@@ -23,12 +26,12 @@ function checkOS() {
 
 		if [[ $ID == "debian" || $ID == "raspbian" ]]; then
 			if [[ $VERSION_ID -lt 9 ]]; then
-				echo "⚠️ Your version of Debian is not supported."
+				echo "⚠️ お使いの Debian のバージョンはサポートされていません。"
 				echo ""
-				echo "However, if you're using Debian >= 9 or unstable/testing then you can continue, at your own risk."
+				echo "ただし、Debian >= 9 または不安定/テスト版を使用している場合は、自己責任で続行できます。"
 				echo ""
 				until [[ $CONTINUE =~ (y|n) ]]; do
-					read -rp "Continue? [y/n]: " -e CONTINUE
+					read -rp "続行しますか? [y/n]: " -e CONTINUE
 				done
 				if [[ $CONTINUE == "n" ]]; then
 					exit 1
@@ -38,12 +41,12 @@ function checkOS() {
 			OS="ubuntu"
 			MAJOR_UBUNTU_VERSION=$(echo "$VERSION_ID" | cut -d '.' -f1)
 			if [[ $MAJOR_UBUNTU_VERSION -lt 16 ]]; then
-				echo "⚠️ Your version of Ubuntu is not supported."
+				echo "⚠️ お使いの Ubuntu のバージョンはサポートされていません。"
 				echo ""
-				echo "However, if you're using Ubuntu >= 16.04 or beta, then you can continue, at your own risk."
+				echo "ただし、Ubuntu 16.04 以上またはベータ版を使用している場合は、自己責任で続行できます。"
 				echo ""
 				until [[ $CONTINUE =~ (y|n) ]]; do
-					read -rp "Continue? [y/n]: " -e CONTINUE
+					read -rp "続行しますか? [y/n]: " -e CONTINUE
 				done
 				if [[ $CONTINUE == "n" ]]; then
 					exit 1
@@ -58,9 +61,9 @@ function checkOS() {
 		if [[ $ID == "centos" || $ID == "rocky" || $ID == "almalinux" ]]; then
 			OS="centos"
 			if [[ ${VERSION_ID%.*} -lt 7 ]]; then
-				echo "⚠️ Your version of CentOS is not supported."
+				echo "⚠️ お使いの CentOS のバージョンはサポートされていません。"
 				echo ""
-				echo "The script only support CentOS 7 and CentOS 8."
+				echo "このスクリプトは CentOS 7 と CentOS 8 のみをサポートします。"
 				echo ""
 				exit 1
 			fi
@@ -68,18 +71,18 @@ function checkOS() {
 		if [[ $ID == "ol" ]]; then
 			OS="oracle"
 			if [[ ! $VERSION_ID =~ (8) ]]; then
-				echo "Your version of Oracle Linux is not supported."
+				echo "ご使用のバージョンの Oracle Linux はサポートされていません。"
 				echo ""
-				echo "The script only support Oracle Linux 8."
+				echo "このスクリプトは Oracle Linux 8 のみをサポートします。"
 				exit 1
 			fi
 		fi
 		if [[ $ID == "amzn" ]]; then
 			OS="amzn"
 			if [[ $VERSION_ID != "2" ]]; then
-				echo "⚠️ Your version of Amazon Linux is not supported."
+				echo "⚠️ お使いの Amazon Linux のバージョンはサポートされていません。"
 				echo ""
-				echo "The script only support Amazon Linux 2."
+				echo "スクリプトは Amazon Linux 2 のみをサポートします。"
 				echo ""
 				exit 1
 			fi
@@ -87,18 +90,18 @@ function checkOS() {
 	elif [[ -e /etc/arch-release ]]; then
 		OS=arch
 	else
-		echo "Looks like you aren't running this installer on a Debian, Ubuntu, Fedora, CentOS, Amazon Linux 2, Oracle Linux 8 or Arch Linux system"
+		echo "このインストーラーを、Debian、Ubuntu、Fedora、CentOS、Amazon Linux 2、Oracle Linux 8、または Arch Linux システムで実行されていないようです。"
 		exit 1
 	fi
 }
 
 function initialCheck() {
 	if ! isRoot; then
-		echo "Sorry, you need to run this as root"
+		echo "申し訳ありませんが、これを root として実行する必要があります"
 		exit 1
 	fi
 	if ! tunAvailable; then
-		echo "TUN is not available"
+		echo "TUNは利用できません"
 		exit 1
 	fi
 	checkOS
@@ -217,15 +220,16 @@ access-control: fd42:42:42:42::/112 allow' >>/etc/unbound/openvpn.conf
 }
 
 function installQuestions() {
-	echo "Welcome to the OpenVPN installer!"
-	echo "The git repository is available at: https://github.com/angristan/openvpn-install"
+	echo "OpenVPN インストーラーへようこそ!"
+	echo "このインストーラーの リポジトリは、https://github.com/yamagami2211/openvpn-install-ja から入手できます。"
+	echo "本家インストーラーのリポジトリは https://github.com/angristan/openvpn-install から入手できます。"
 	echo ""
 
-	echo "I need to ask you a few questions before starting the setup."
-	echo "You can leave the default options and just press enter if you are ok with them."
+	echo "セットアップを開始する前に、いくつか質問する必要があります。"
+	echo "デフォルトのオプションをそのまま使用し、問題なければ Enter キーを押してください。"
 	echo ""
-	echo "I need to know the IPv4 address of the network interface you want OpenVPN listening to."
-	echo "Unless your server is behind NAT, it should be your public IPv4 address."
+	echo "OpenVPN がリッスンするネットワーク インターフェイスの IPv4 アドレスを知る必要があります。"
+	echo "サーバーが NAT の背後にない限り、パブリック IPv4 アドレスにする必要があります。"
 
 	# Detect public IPv4 address and pre-fill for the user
 	IP=$(ip -4 addr | sed -ne 's|^.* inet \([^/]*\)/.* scope global.*$|\1|p' | head -1)
@@ -241,12 +245,12 @@ function installQuestions() {
 	# If $IP is a private IP address, the server must be behind NAT
 	if echo "$IP" | grep -qE '^(10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|192\.168)'; then
 		echo ""
-		echo "It seems this server is behind NAT. What is its public IPv4 address or hostname?"
-		echo "We need it for the clients to connect to the server."
+		echo "このサーバーは NAT の背後にあるようです。 パブリック IPv4 アドレスまたはホスト名は何ですか?"
+		echo "クライアントがサーバーに接続するために必要です。"
 
 		PUBLICIP=$(curl -s https://api.ipify.org)
 		until [[ $ENDPOINT != "" ]]; do
-			read -rp "Public IPv4 address or hostname: " -e -i "$PUBLICIP" ENDPOINT
+			read -rp "パブリックIPv4アドレスまたはホスト名: " -e -i "$PUBLICIP" ENDPOINT
 		done
 	fi
 
@@ -260,24 +264,24 @@ function installQuestions() {
 		PING6="ping -6 -c3 ipv6.google.com > /dev/null 2>&1"
 	fi
 	if eval "$PING6"; then
-		echo "Your host appears to have IPv6 connectivity."
+		echo "ホストには IPv6 接続があるようです。"
 		SUGGESTION="y"
 	else
-		echo "Your host does not appear to have IPv6 connectivity."
+		echo "ホストには IPv6 接続がないようです。"
 		SUGGESTION="n"
 	fi
 	echo ""
 	# Ask the user if they want to enable IPv6 regardless its availability.
 	until [[ $IPV6_SUPPORT =~ (y|n) ]]; do
-		read -rp "Do you want to enable IPv6 support (NAT)? [y/n]: " -e -i $SUGGESTION IPV6_SUPPORT
+		read -rp "IPv6 サポート (NAT) を有効にしますか? [y/n]: " -e -i $SUGGESTION IPV6_SUPPORT
 	done
 	echo ""
-	echo "What port do you want OpenVPN to listen to?"
+	echo "OpenVPN にどのポートをリッスンさせたいですか?"
 	echo "   1) Default: 1194"
 	echo "   2) Custom"
 	echo "   3) Random [49152-65535]"
 	until [[ $PORT_CHOICE =~ ^[1-3]$ ]]; do
-		read -rp "Port choice [1-3]: " -e -i 1 PORT_CHOICE
+		read -rp "ポートの選択 [1-3]: " -e -i 1 PORT_CHOICE
 	done
 	case $PORT_CHOICE in
 	1)
@@ -285,22 +289,22 @@ function installQuestions() {
 		;;
 	2)
 		until [[ $PORT =~ ^[0-9]+$ ]] && [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]; do
-			read -rp "Custom port [1-65535]: " -e -i 1194 PORT
+			read -rp "カスタムポート [1-65535]: " -e -i 1194 PORT
 		done
 		;;
 	3)
 		# Generate random number within private ports range
 		PORT=$(shuf -i49152-65535 -n1)
-		echo "Random Port: $PORT"
+		echo "ランダムポート: $PORT"
 		;;
 	esac
 	echo ""
-	echo "What protocol do you want OpenVPN to use?"
-	echo "UDP is faster. Unless it is not available, you shouldn't use TCP."
+	echo "OpenVPN で使用したいプロトコルは何ですか?"
+	echo "UDP の方が高速です。 利用できない場合を除き、TCP を使用しないでください。"
 	echo "   1) UDP"
 	echo "   2) TCP"
 	until [[ $PROTOCOL_CHOICE =~ ^[1-2]$ ]]; do
-		read -rp "Protocol [1-2]: " -e -i 1 PROTOCOL_CHOICE
+		read -rp "プロトコル [1-2]: " -e -i 1 PROTOCOL_CHOICE
 	done
 	case $PROTOCOL_CHOICE in
 	1)
@@ -311,9 +315,9 @@ function installQuestions() {
 		;;
 	esac
 	echo ""
-	echo "What DNS resolvers do you want to use with the VPN?"
-	echo "   1) Current system resolvers (from /etc/resolv.conf)"
-	echo "   2) Self-hosted DNS Resolver (Unbound)"
+	echo "VPN でどの DNS リゾルバーを使用したいですか?"
+	echo "   1) 現在のシステムリゾルバー (from /etc/resolv.conf)"
+	echo "   2) セルフホスト型 DNS リゾルバー (Unbound)"
 	echo "   3) Cloudflare (Anycast: worldwide)"
 	echo "   4) Quad9 (Anycast: worldwide)"
 	echo "   5) Quad9 uncensored (Anycast: worldwide)"
@@ -324,19 +328,19 @@ function installQuestions() {
 	echo "   10) Yandex Basic (Russia)"
 	echo "   11) AdGuard DNS (Anycast: worldwide)"
 	echo "   12) NextDNS (Anycast: worldwide)"
-	echo "   13) Custom"
+	echo "   13) カスタム"
 	until [[ $DNS =~ ^[0-9]+$ ]] && [ "$DNS" -ge 1 ] && [ "$DNS" -le 13 ]; do
 		read -rp "DNS [1-12]: " -e -i 11 DNS
 		if [[ $DNS == 2 ]] && [[ -e /etc/unbound/unbound.conf ]]; then
 			echo ""
-			echo "Unbound is already installed."
-			echo "You can allow the script to configure it in order to use it from your OpenVPN clients"
-			echo "We will simply add a second server to /etc/unbound/unbound.conf for the OpenVPN subnet."
-			echo "No changes are made to the current configuration."
+			echo "Unbound はすでにインストールされています。"
+			echo "OpenVPN クライアントから使用するために、スクリプトによる設定を許可できます。"
+			echo "OpenVPN サブネットの /etc/unbound/unbound.conf に 2 番目のサーバーを追加するだけです。"
+			echo "現在の構成には変更は加えられません。"
 			echo ""
 
 			until [[ $CONTINUE =~ (y|n) ]]; do
-				read -rp "Apply configuration changes to Unbound? [y/n]: " -e CONTINUE
+				read -rp "構成変更をUnboundに適用しますか? [y/n]: " -e CONTINUE
 			done
 			if [[ $CONTINUE == "n" ]]; then
 				# Break the loop and cleanup
@@ -356,17 +360,17 @@ function installQuestions() {
 		fi
 	done
 	echo ""
-	echo "Do you want to use compression? It is not recommended since the VORACLE attack makes use of it."
+	echo "圧縮を使用しますか? VORACLE 攻撃を利用するため、推奨されません。"
 	until [[ $COMPRESSION_ENABLED =~ (y|n) ]]; do
-		read -rp"Enable compression? [y/n]: " -e -i n COMPRESSION_ENABLED
+		read -rp"圧縮を有効にしますか? [y/n]: " -e -i n COMPRESSION_ENABLED
 	done
 	if [[ $COMPRESSION_ENABLED == "y" ]]; then
-		echo "Choose which compression algorithm you want to use: (they are ordered by efficiency)"
+		echo "使用する圧縮アルゴリズムを選択します: (効率の順に並べられています)"
 		echo "   1) LZ4-v2"
 		echo "   2) LZ4"
 		echo "   3) LZ0"
 		until [[ $COMPRESSION_CHOICE =~ ^[1-3]$ ]]; do
-			read -rp"Compression algorithm [1-3]: " -e -i 1 COMPRESSION_CHOICE
+			read -rp"圧縮アルゴリズム [1-3]: " -e -i 1 COMPRESSION_CHOICE
 		done
 		case $COMPRESSION_CHOICE in
 		1)
@@ -381,13 +385,13 @@ function installQuestions() {
 		esac
 	fi
 	echo ""
-	echo "Do you want to customize encryption settings?"
-	echo "Unless you know what you're doing, you should stick with the default parameters provided by the script."
-	echo "Note that whatever you choose, all the choices presented in the script are safe. (Unlike OpenVPN's defaults)"
-	echo "See https://github.com/angristan/openvpn-install#security-and-encryption to learn more."
+	echo "暗号化設定をカスタマイズしますか?"
+	echo "何をしているのかよくわかっていない限り、スクリプトによって提供されるデフォルトのパラメーターをそのまま使用する必要があります。"
+	echo "何を選択しても、スクリプト内に表示されるすべての選択肢は安全であることに注意してください。 (OpenVPN のデフォルトとは異なります)"
+	echo "詳細については、https://github.com/angristan/openvpn-install#security-and-encryption を参照してください。"
 	echo ""
 	until [[ $CUSTOMIZE_ENC =~ (y|n) ]]; do
-		read -rp "Customize encryption settings? [y/n]: " -e -i n CUSTOMIZE_ENC
+		read -rp "暗号化設定をカスタマイズしますか? [y/n]: " -e -i n CUSTOMIZE_ENC
 	done
 	if [[ $CUSTOMIZE_ENC == "n" ]]; then
 		# Use default, sane and fast parameters
@@ -401,8 +405,8 @@ function installQuestions() {
 		TLS_SIG="1" # tls-crypt
 	else
 		echo ""
-		echo "Choose which cipher you want to use for the data channel:"
-		echo "   1) AES-128-GCM (recommended)"
+		echo "データ チャネルに使用する暗号を選択します:"
+		echo "   1) AES-128-GCM (推奨)"
 		echo "   2) AES-192-GCM"
 		echo "   3) AES-256-GCM"
 		echo "   4) AES-128-CBC"
@@ -432,8 +436,8 @@ function installQuestions() {
 			;;
 		esac
 		echo ""
-		echo "Choose what kind of certificate you want to use:"
-		echo "   1) ECDSA (recommended)"
+		echo "使用する証明書の種類を選択してください:"
+		echo "   1) ECDSA (推奨)"
 		echo "   2) RSA"
 		until [[ $CERT_TYPE =~ ^[1-2]$ ]]; do
 			read -rp"Certificate key type [1-2]: " -e -i 1 CERT_TYPE
@@ -441,8 +445,8 @@ function installQuestions() {
 		case $CERT_TYPE in
 		1)
 			echo ""
-			echo "Choose which curve you want to use for the certificate's key:"
-			echo "   1) prime256v1 (recommended)"
+			echo "証明書のキーに使用する曲線を選択します:"
+			echo "   1) prime256v1 (推奨)"
 			echo "   2) secp384r1"
 			echo "   3) secp521r1"
 			until [[ $CERT_CURVE_CHOICE =~ ^[1-3]$ ]]; do
@@ -462,8 +466,8 @@ function installQuestions() {
 			;;
 		2)
 			echo ""
-			echo "Choose which size you want to use for the certificate's RSA key:"
-			echo "   1) 2048 bits (recommended)"
+			echo "証明書の RSA キーに使用するサイズを選択します:"
+			echo "   1) 2048 bits (推奨)"
 			echo "   2) 3072 bits"
 			echo "   3) 4096 bits"
 			until [[ $RSA_KEY_SIZE_CHOICE =~ ^[1-3]$ ]]; do
@@ -483,10 +487,10 @@ function installQuestions() {
 			;;
 		esac
 		echo ""
-		echo "Choose which cipher you want to use for the control channel:"
+		echo "制御チャネルに使用する暗号を選択します:"
 		case $CERT_TYPE in
 		1)
-			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (recommended)"
+			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (推奨)"
 			echo "   2) ECDHE-ECDSA-AES-256-GCM-SHA384"
 			until [[ $CC_CIPHER_CHOICE =~ ^[1-2]$ ]]; do
 				read -rp"Control channel cipher [1-2]: " -e -i 1 CC_CIPHER_CHOICE
@@ -501,7 +505,7 @@ function installQuestions() {
 			esac
 			;;
 		2)
-			echo "   1) ECDHE-RSA-AES-128-GCM-SHA256 (recommended)"
+			echo "   1) ECDHE-RSA-AES-128-GCM-SHA256 (推奨)"
 			echo "   2) ECDHE-RSA-AES-256-GCM-SHA384"
 			until [[ $CC_CIPHER_CHOICE =~ ^[1-2]$ ]]; do
 				read -rp"Control channel cipher [1-2]: " -e -i 1 CC_CIPHER_CHOICE
@@ -517,8 +521,8 @@ function installQuestions() {
 			;;
 		esac
 		echo ""
-		echo "Choose what kind of Diffie-Hellman key you want to use:"
-		echo "   1) ECDH (recommended)"
+		echo "使用する Diffie-Hellman キーの種類を選択してください:"
+		echo "   1) ECDH (推奨)"
 		echo "   2) DH"
 		until [[ $DH_TYPE =~ [1-2] ]]; do
 			read -rp"DH key type [1-2]: " -e -i 1 DH_TYPE
@@ -526,8 +530,8 @@ function installQuestions() {
 		case $DH_TYPE in
 		1)
 			echo ""
-			echo "Choose which curve you want to use for the ECDH key:"
-			echo "   1) prime256v1 (recommended)"
+			echo "ECDH キーに使用するカーブを選択します:"
+			echo "   1) prime256v1 (推奨)"
 			echo "   2) secp384r1"
 			echo "   3) secp521r1"
 			while [[ $DH_CURVE_CHOICE != "1" && $DH_CURVE_CHOICE != "2" && $DH_CURVE_CHOICE != "3" ]]; do
@@ -547,8 +551,8 @@ function installQuestions() {
 			;;
 		2)
 			echo ""
-			echo "Choose what size of Diffie-Hellman key you want to use:"
-			echo "   1) 2048 bits (recommended)"
+			echo "使用する Diffie-Hellman キーのサイズを選択します:"
+			echo "   1) 2048 bits (推奨)"
 			echo "   2) 3072 bits"
 			echo "   3) 4096 bits"
 			until [[ $DH_KEY_SIZE_CHOICE =~ ^[1-3]$ ]]; do
@@ -570,12 +574,12 @@ function installQuestions() {
 		echo ""
 		# The "auth" options behaves differently with AEAD ciphers
 		if [[ $CIPHER =~ CBC$ ]]; then
-			echo "The digest algorithm authenticates data channel packets and tls-auth packets from the control channel."
+			echo "ダイジェスト アルゴリズムは、データ チャネル パケットと制御チャネルからの tls-auth パケットを認証します。"
 		elif [[ $CIPHER =~ GCM$ ]]; then
-			echo "The digest algorithm authenticates tls-auth packets from the control channel."
+			echo "ダイジェスト アルゴリズムは、制御チャネルからの tls-auth パケットを認証します。"
 		fi
-		echo "Which digest algorithm do you want to use for HMAC?"
-		echo "   1) SHA-256 (recommended)"
+		echo "HMAC にどのダイジェスト アルゴリズムを使用しますか?"
+		echo "   1) SHA-256 (推奨)"
 		echo "   2) SHA-384"
 		echo "   3) SHA-512"
 		until [[ $HMAC_ALG_CHOICE =~ ^[1-3]$ ]]; do
@@ -593,20 +597,20 @@ function installQuestions() {
 			;;
 		esac
 		echo ""
-		echo "You can add an additional layer of security to the control channel with tls-auth and tls-crypt"
-		echo "tls-auth authenticates the packets, while tls-crypt authenticate and encrypt them."
-		echo "   1) tls-crypt (recommended)"
+		echo "tls-auth および tls-crypt を使用して、追加のセキュリティ層を制御チャネルに追加できます。"
+		echo "tls-auth はパケットを認証し、tls-crypt はパケットを認証して暗号化します。"
+		echo "   1) tls-crypt (推奨)"
 		echo "   2) tls-auth"
 		until [[ $TLS_SIG =~ [1-2] ]]; do
-			read -rp "Control channel additional security mechanism [1-2]: " -e -i 1 TLS_SIG
+			read -rp "制御チャネルの追加セキュリティメカニズム [1-2]: " -e -i 1 TLS_SIG
 		done
 	fi
 	echo ""
-	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now."
-	echo "You will be able to generate a client at the end of the installation."
+	echo "はい、必要なのはそれだけでした。 これで、OpenVPN サーバーをセットアップする準備が整いました。"
+	echo "インストールの最後にクライアントを生成できるようになります。"
 	APPROVE_INSTALL=${APPROVE_INSTALL:-n}
 	if [[ $APPROVE_INSTALL =~ n ]]; then
-		read -n1 -r -p "Press any key to continue..."
+		read -n1 -r -p "何かキーを押すと続行します..."
 	fi
 }
 
@@ -650,8 +654,8 @@ function installOpenVPN() {
 	# $NIC can not be empty for script rm-openvpn-rules.sh
 	if [[ -z $NIC ]]; then
 		echo
-		echo "Can not detect public interface."
-		echo "This needs for setup MASQUERADE."
+		echo "パブリックインターフェイスを検出できません。"
+		echo "これには MASQUERADE のセットアップが必要です。"
 		until [[ $CONTINUE =~ (y|n) ]]; do
 			read -rp "Continue? [y/n]: " -e CONTINUE
 		done
@@ -1059,27 +1063,27 @@ verb 3" >>/etc/openvpn/client-template.txt
 
 function newClient() {
 	echo ""
-	echo "Tell me a name for the client."
-	echo "The name must consist of alphanumeric character. It may also include an underscore or a dash."
+	echo "クライアントの名前を教えてください。"
+	echo "名前は英数字で構成する必要があります。 アンダースコアまたはダッシュを含めることもできます。"
 
 	until [[ $CLIENT =~ ^[a-zA-Z0-9_-]+$ ]]; do
-		read -rp "Client name: " -e CLIENT
+		read -rp "クライアント名: " -e CLIENT
 	done
 
 	echo ""
-	echo "Do you want to protect the configuration file with a password?"
-	echo "(e.g. encrypt the private key with a password)"
-	echo "   1) Add a passwordless client"
-	echo "   2) Use a password for the client"
+	echo "設定ファイルをパスワードで保護しますか?"
+	echo "(例: 秘密鍵をパスワードで暗号化する)"
+	echo "   1) パスワードなしのクライアントを追加する"
+	echo "   2) クライアントのパスワードを使用する"
 
 	until [[ $PASS =~ ^[1-2]$ ]]; do
-		read -rp "Select an option [1-2]: " -e -i 1 PASS
+		read -rp "選択肢一つを選択してください [1-2]: " -e -i 1 PASS
 	done
 
 	CLIENTEXISTS=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep -c -E "/CN=$CLIENT\$")
 	if [[ $CLIENTEXISTS == '1' ]]; then
 		echo ""
-		echo "The specified client CN was already found in easy-rsa, please choose another name."
+		echo "指定されたクライアント CN は easy-rsa で既に見つかりました。別の名前を選択してください。"
 		exit
 	else
 		cd /etc/openvpn/easy-rsa/ || return
@@ -1088,11 +1092,11 @@ function newClient() {
 			./easyrsa --batch build-client-full "$CLIENT" nopass
 			;;
 		2)
-			echo "⚠️ You will be asked for the client password below ⚠️"
+			echo "⚠️ 以下でクライアントのパスワードを求められます ⚠️"
 			./easyrsa --batch build-client-full "$CLIENT"
 			;;
 		esac
-		echo "Client $CLIENT added."
+		echo "クライアント $CLIENT 追加しました。"
 	fi
 
 	# Home directory of the user, where the client configuration will be written
@@ -1150,8 +1154,8 @@ function newClient() {
 	} >>"$homeDir/$CLIENT.ovpn"
 
 	echo ""
-	echo "The configuration file has been written to $homeDir/$CLIENT.ovpn."
-	echo "Download the .ovpn file and import it in your OpenVPN client."
+	echo "構成ファイルは $homeDir/$CLIENT.ovpn に書き込まれています。"
+	echo ".ovpn ファイルをダウンロードし、OpenVPN クライアントにインポートします。"
 
 	exit 0
 }
@@ -1160,18 +1164,18 @@ function revokeClient() {
 	NUMBEROFCLIENTS=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep -c "^V")
 	if [[ $NUMBEROFCLIENTS == '0' ]]; then
 		echo ""
-		echo "You have no existing clients!"
+		echo "既存のクライアントがいません!"
 		exit 1
 	fi
 
 	echo ""
-	echo "Select the existing client certificate you want to revoke"
+	echo "取り消したい既存のクライアント証明書を選択します"
 	tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') '
 	until [[ $CLIENTNUMBER -ge 1 && $CLIENTNUMBER -le $NUMBEROFCLIENTS ]]; do
 		if [[ $CLIENTNUMBER == '1' ]]; then
-			read -rp "Select one client [1]: " CLIENTNUMBER
+			read -rp "クライアントを 1 つ選択してください [1]: " CLIENTNUMBER
 		else
-			read -rp "Select one client [1-$NUMBEROFCLIENTS]: " CLIENTNUMBER
+			read -rp "クライアントを 1 つ選択してください [1-$NUMBEROFCLIENTS]: " CLIENTNUMBER
 		fi
 	done
 	CLIENT=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | sed -n "$CLIENTNUMBER"p)
@@ -1187,7 +1191,7 @@ function revokeClient() {
 	cp /etc/openvpn/easy-rsa/pki/index.txt{,.bk}
 
 	echo ""
-	echo "Certificate for client $CLIENT revoked."
+	echo "クライアント $CLIENT の証明書が取り消されました。"
 }
 
 function removeUnbound() {
@@ -1197,8 +1201,8 @@ function removeUnbound() {
 
 	until [[ $REMOVE_UNBOUND =~ (y|n) ]]; do
 		echo ""
-		echo "If you were already using Unbound before installing OpenVPN, I removed the configuration related to OpenVPN."
-		read -rp "Do you want to completely remove Unbound? [y/n]: " -e REMOVE_UNBOUND
+		echo "OpenVPN をインストールする前に既に Unbound を使用していた場合は、OpenVPN に関連する設定を削除しました。"
+		read -rp "Unbound を完全に削除しますか? [y/n]: " -e REMOVE_UNBOUND
 	done
 
 	if [[ $REMOVE_UNBOUND == 'y' ]]; then
@@ -1218,17 +1222,17 @@ function removeUnbound() {
 		rm -rf /etc/unbound/
 
 		echo ""
-		echo "Unbound removed!"
+		echo "Unbound が削除されました!"
 	else
 		systemctl restart unbound
 		echo ""
-		echo "Unbound wasn't removed."
+		echo "Unbound は削除されませんでした。"
 	fi
 }
 
 function removeOpenVPN() {
 	echo ""
-	read -rp "Do you really want to remove OpenVPN? [y/n]: " -e -i n REMOVE
+	read -rp "本当に OpenVPN を削除しますか? [y/n]: " -e -i n REMOVE
 	if [[ $REMOVE == 'y' ]]; then
 		# Get OpenVPN port from the configuration
 		PORT=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2)
@@ -1295,24 +1299,25 @@ function removeOpenVPN() {
 			removeUnbound
 		fi
 		echo ""
-		echo "OpenVPN removed!"
+		echo "OpenVPN が削除されました!"
 	else
 		echo ""
-		echo "Removal aborted!"
+		echo "削除は中止されました!"
 	fi
 }
 
 function manageMenu() {
-	echo "Welcome to OpenVPN-install!"
-	echo "The git repository is available at: https://github.com/angristan/openvpn-install"
+	echo "OpenVPN インストーラーへようこそ!"
+	echo "このインストーラーの リポジトリは、https://github.com/yamagami2211/openvpn-install-ja から入手できます。"
+	echo "本家インストーラーのリポジトリは https://github.com/angristan/openvpn-install から入手できます。"
 	echo ""
-	echo "It looks like OpenVPN is already installed."
+	echo "OpenVPN はすでにインストールされているようです。"
 	echo ""
-	echo "What do you want to do?"
-	echo "   1) Add a new user"
-	echo "   2) Revoke existing user"
-	echo "   3) Remove OpenVPN"
-	echo "   4) Exit"
+	echo "あなたは何をしたいですか?"
+	echo "   1) 新しいユーザーを追加する"
+	echo "   2) 既存のユーザーを取り消す"
+	echo "   3) OpenVPN を削除する"
+	echo "   4) 終了"
 	until [[ $MENU_OPTION =~ ^[1-4]$ ]]; do
 		read -rp "Select an option [1-4]: " MENU_OPTION
 	done
